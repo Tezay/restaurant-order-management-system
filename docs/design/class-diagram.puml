@@ -1,0 +1,336 @@
+@startuml class-diagram
+title Restaurant Order Management System - Class diagram
+
+skinparam classAttributeIconSize 0
+hide empty members
+
+package "java (JDK)" {
+  interface "Comparable<MenuItem>" as Comparable
+  interface "Iterable<MenuItem>" as Iterable
+  interface Runnable
+  class Exception
+}
+
+package contract {
+  interface Identifiable {
+    + getId() : String
+  }
+
+  interface PaymentMethod {
+    + pay(amountDue : BigDecimal) : BigDecimal
+  }
+
+  interface "LineParser<T>" as LineParser {
+    + parse(fields : String[]) : T
+  }
+}
+
+package exception {
+  class RestaurantException {
+    + RestaurantException(message : String)
+  }
+}
+
+package model {
+  abstract class MenuItem {
+    - id : String
+    - name : String
+    - price : BigDecimal
+    - category : Category
+    - available : boolean
+    # MenuItem(id : String, name : String, price : BigDecimal, category : Category, available : boolean)
+    + getId() : String
+    + getName() : String
+    + getPrice() : BigDecimal
+    + getCategory() : Category
+    + isAvailable() : boolean
+    + compareTo(other : MenuItem) : int
+    + {abstract} getPreparationMinutes() : int
+    + {abstract} describe() : String
+  }
+
+  class FoodItem {
+    - preparationMinutes : int
+    - dietaryTag : DietaryTag
+    + getDietaryTag() : DietaryTag
+    + getPreparationMinutes() : int
+    + describe() : String
+  }
+
+  class Beverage {
+    - volumeMl : int
+    - alcoholic : boolean
+    + isAlcoholic() : boolean
+    + getPreparationMinutes() : int
+    + describe() : String
+  }
+
+  enum Category {
+    STARTER
+    MAIN
+    DESSERT
+    DRINK
+  }
+
+  enum DietaryTag {
+    NONE
+    VEGETARIAN
+    VEGAN
+    GLUTEN_FREE
+  }
+
+  class DiningTable {
+    - id : String
+    - capacity : int
+    + DiningTable(id : String, capacity : int)
+    + getId() : String
+    + getCapacity() : int
+  }
+
+  class RestaurantOrder {
+    - {static} TAX_RATE : BigDecimal = 0.14975
+    - id : String
+    - tableId : String
+    - status : OrderStatus
+    - tipRate : TipRate
+    - lines : List<OrderLine>
+    + RestaurantOrder(id : String, tableId : String)
+    + {static} restore(id : String, tableId : String, status : OrderStatus, tipRate : TipRate, items : Map<MenuItem, Integer>) : RestaurantOrder
+    + getId() : String
+    + getTableId() : String
+    + getStatus() : OrderStatus
+    + getLines() : List<OrderLine>
+    + addItem(item : MenuItem, quantity : int) : void
+    + updateQuantity(itemId : String, quantity : int) : void
+    + removeItem(itemId : String) : void
+    + moveTo(next : OrderStatus) : void
+    + setTipRate(tipRate : TipRate) : void
+    + getSubtotal() : BigDecimal
+    + getTax() : BigDecimal
+    + getTip() : BigDecimal
+    + getTotal() : BigDecimal
+  }
+
+  class OrderLine {
+    - item : MenuItem
+    - quantity : int
+    + getItem() : MenuItem
+    + getQuantity() : int
+    + getAmount() : BigDecimal
+  }
+
+  enum OrderStatus {
+    OPEN
+    CONFIRMED
+    PREPARING
+    READY
+    PAID
+    CLOSED
+    CANCELLED
+    + canMoveTo(next : OrderStatus) : boolean
+    + isActive() : boolean
+  }
+
+  enum TipRate {
+    NO_TIP
+    PERCENT_15
+    PERCENT_18
+    PERCENT_20
+    - percent : int
+    + applyTo(subtotal : BigDecimal) : BigDecimal
+  }
+
+  class CashPayment {
+    - amountGiven : BigDecimal
+    + CashPayment(amountGiven : BigDecimal)
+    + pay(amountDue : BigDecimal) : BigDecimal
+  }
+
+  class CardPayment {
+    - cardNumber : String
+    + CardPayment(cardNumber : String)
+    + pay(amountDue : BigDecimal) : BigDecimal
+  }
+}
+
+package ordering {
+  class MenuItemComparators {
+    - MenuItemComparators()
+    + {static} byPrice() : Comparator<MenuItem>
+    + {static} byName() : Comparator<MenuItem>
+  }
+}
+
+package repository {
+  class "Repository<T extends Identifiable>" as Repository {
+    - items : Map<String, T>
+    + add(item : T) : void
+    + findById(id : String) : Optional<T>
+    + getAll() : Collection<T>
+  }
+
+  class Menu {
+    + iterator() : Iterator<MenuItem>
+  }
+
+  class FileStorage {
+    - FileStorage()
+    + {static} <T extends Identifiable> load(file : Path, parser : LineParser<T>, target : Repository<T>) : List<String>
+    + {static} <T> save(file : Path, items : Collection<? extends T>, formatter : Function<T, String>) : void
+    + {static} parseMenuItem(fields : String[]) : MenuItem
+    + {static} parseTable(fields : String[]) : DiningTable
+    + {static} parseOrder(fields : String[], menu : Menu) : RestaurantOrder
+    + {static} format(item : MenuItem) : String
+    + {static} format(table : DiningTable) : String
+    + {static} format(order : RestaurantOrder) : String
+  }
+}
+
+package service {
+  class OrderService {
+    - menu : Menu
+    - tables : Repository<DiningTable>
+    - orders : Repository<RestaurantOrder>
+    - activeTableIds : Set<String>
+    - nextOrderNumber : int
+    + OrderService(menu : Menu, tables : Repository<DiningTable>, orders : Repository<RestaurantOrder>)
+    + openOrder(tableId : String) : RestaurantOrder
+    + addItem(orderId : String, itemId : String, quantity : int) : void
+    + updateQuantity(orderId : String, itemId : String, quantity : int) : void
+    + removeItem(orderId : String, itemId : String) : void
+    + cancel(orderId : String) : void
+    + confirm(orderId : String) : void
+    + pay(orderId : String, tipRate : TipRate, method : PaymentMethod) : BigDecimal
+    + close(orderId : String) : void
+    + findOrder(orderId : String) : RestaurantOrder
+    + getActiveOrders() : List<RestaurantOrder>
+  }
+
+  class KitchenService {
+    - {static} COOK_COUNT : int = 2
+    - cooks : List<Thread>
+    - board : KitchenBoard
+    - order : RestaurantOrder
+    + start(order : RestaurantOrder) : void
+    + waitUntilDone() : void
+    + close() : void
+  }
+}
+
+package concurrent {
+  class KitchenBoard {
+    - pending : Queue<OrderLine>
+    - finishedCount : int
+    + KitchenBoard(lines : List<OrderLine>)
+    + synchronized takeNext() : Optional<OrderLine>
+    + synchronized markFinished() : void
+    + synchronized getFinishedCount() : int
+  }
+
+  class Cook {
+    - board : KitchenBoard
+    + Cook(board : KitchenBoard)
+    + run() : void
+  }
+}
+
+package report {
+  class ReportService {
+    - menu : Menu
+    - orders : Repository<RestaurantOrder>
+    + totalRevenue() : BigDecimal
+    + salesByCategory() : Map<Category, BigDecimal>
+    + availableItemsWithTag(tag : DietaryTag) : List<MenuItem>
+  }
+}
+
+package app {
+  class RestaurantApp {
+    - {static} SEED_DIR : Path
+    - {static} RUNTIME_DIR : Path
+    + {static} main(args : String[]) : void
+  }
+
+  annotation MenuOption {
+    + order() : int
+    + label() : String
+  }
+
+  class ConsoleMenu {
+    - scanner : Scanner
+    - orderService : OrderService
+    - kitchen : KitchenService
+    - reports : ReportService
+    - menu : Menu
+    - running : boolean
+    + run() : void
+    - findOptions() : List<Method>
+    - readInt(prompt : String, min : int, max : int) : int
+    - readLine(prompt : String) : String
+    .. @MenuOption actions ..
+    + showMenu() : void
+    + openOrder() : void
+    + addItem() : void
+    + updateQuantity() : void
+    + removeItem() : void
+    + cancelOrder() : void
+    + confirmOrder() : void
+    + startKitchen() : void
+    + waitForKitchen() : void
+    + closeKitchen() : void
+    + payOrder() : void
+    + closeOrder() : void
+    + showReports() : void
+    + exit() : void
+  }
+}
+
+' Inheritance and interface implementation
+MenuItem <|-- FoodItem
+MenuItem <|-- Beverage
+Identifiable <|.. MenuItem
+Comparable <|.. MenuItem
+Identifiable <|.. DiningTable
+Identifiable <|.. RestaurantOrder
+PaymentMethod <|.. CashPayment
+PaymentMethod <|.. CardPayment
+Iterable <|.. Menu
+Repository <|-- Menu : Repository<MenuItem>
+Runnable <|.. Cook
+Exception <|-- RestaurantException
+
+' Composition, nesting and associations
+RestaurantOrder +-- OrderLine
+RestaurantOrder "1" *-- "0..*" OrderLine
+OrderLine --> MenuItem
+RestaurantOrder --> OrderStatus
+RestaurantOrder --> TipRate
+MenuItem --> Category
+FoodItem --> DietaryTag
+
+FileStorage ..> LineParser
+FileStorage ..> Repository
+
+OrderService --> Menu
+OrderService --> Repository
+OrderService ..> PaymentMethod
+
+KitchenService *-- KitchenBoard
+KitchenService --> "2" Cook : starts, interrupts, joins
+KitchenService --> RestaurantOrder
+Cook --> KitchenBoard : shared
+KitchenBoard --> OrderLine
+
+ReportService --> Menu
+ReportService --> Repository
+
+MenuItemComparators ..> MenuItem
+
+RestaurantApp ..> FileStorage
+RestaurantApp ..> ConsoleMenu
+ConsoleMenu --> OrderService
+ConsoleMenu --> KitchenService
+ConsoleMenu --> ReportService
+ConsoleMenu ..> MenuOption : reads by reflection
+
+@enduml
