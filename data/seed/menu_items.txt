@@ -1,0 +1,27 @@
+M001;FOOD;Classic poutine;12.95;MAIN;true;8;NONE
+M002;FOOD;Double poutine;21.95;MAIN;true;12;NONE
+M003;FOOD;3 AM poutine;15.00;MAIN;true;10;NONE
+M004;FOOD;Vegan poutine;14.50;MAIN;true;9;VEGAN
+M005;FOOD;Gluten-free poutine;14.25;MAIN;true;9;GLUTEN_FREE
+M006;FOOD;Poutine without fries;9.95;MAIN;true;5;NONE
+M007;FOOD;Poutine without cheese curds;10.95;MAIN;true;7;NONE
+M008;FOOD;Poutine without gravy;10.95;MAIN;true;6;VEGETARIAN
+M009;FOOD;Poutine without anything;0.99;MAIN;true;1;VEGAN
+M010;FOOD;No poutine;0.00;MAIN;true;0;VEGAN
+M011;FOOD;Poutine with raw fries;10.50;MAIN;true;2;NONE
+M012;FOOD;Yesterday's poutine;6.25;MAIN;true;2;NONE
+M013;FOOD;Expired poutine (30 days);4.75;MAIN;false;2;NONE
+M015;FOOD;Lobster poutine;34.95;MAIN;false;15;NONE
+M016;FOOD;Squeaky cheese curds;6.50;STARTER;true;2;VEGETARIAN
+M017;FOOD;Shot of gravy;3.95;STARTER;true;1;NONE
+M018;FOOD;Mini poutine;7.95;STARTER;false;5;NONE
+M019;FOOD;Maple poutine;9.50;DESSERT;true;6;VEGETARIAN
+M020;FOOD;Sugar poutine (with apples);8.95;DESSERT;true;6;VEGETARIAN
+M021;FOOD;Poutine ice cream;7.25;DESSERT;false;3;VEGETARIAN
+M022;FOOD;Sugar pie;7.50;DESSERT;true;3;VEGETARIAN
+M023;DRINK;Spruce beer;3.95;DRINK;true;355;false
+M024;DRINK;Maple water;4.25;DRINK;true;330;false
+M025;DRINK;Poutine smoothie;8.50;DRINK;true;400;false
+M026;DRINK;Gravy smoothie;5.95;DRINK;false;400;false
+M027;DRINK;Poutine pale ale;8.50;DRINK;true;473;true
+M028;DRINK;Caribou;9.50;DRINK;true;120;true
