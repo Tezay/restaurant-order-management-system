@@ -52,6 +52,7 @@ package model {
   class FoodItem {
     - preparationMinutes : int
     - dietaryTag : DietaryTag
+    + FoodItem(id : String, name : String, price : BigDecimal, category : Category, available : boolean, preparationMinutes : int, dietaryTag : DietaryTag)
     + getDietaryTag() : DietaryTag
     + getPreparationMinutes() : int
     + describe() : String
@@ -60,6 +61,7 @@ package model {
   class Beverage {
     - volumeMl : int
     - alcoholic : boolean
+    + Beverage(id : String, name : String, price : BigDecimal, category : Category, available : boolean, volumeMl : int, alcoholic : boolean)
     + isAlcoholic() : boolean
     + getPreparationMinutes() : int
     + describe() : String
@@ -238,6 +240,7 @@ package report {
   class ReportService {
     - menu : Menu
     - orders : Repository<RestaurantOrder>
+    + ReportService(menu : Menu, orders : Repository<RestaurantOrder>)
     + totalRevenue() : BigDecimal
     + salesByCategory() : Map<Category, BigDecimal>
     + availableItemsWithTag(tag : DietaryTag) : List<MenuItem>
@@ -263,6 +266,7 @@ package app {
     - reports : ReportService
     - menu : Menu
     - running : boolean
+    + ConsoleMenu(orderService : OrderService, kitchen : KitchenService, reports : ReportService, menu : Menu)
     + run() : void
     - findOptions() : List<Method>
     - readInt(prompt : String, min : int, max : int) : int
