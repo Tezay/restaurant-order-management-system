@@ -35,8 +35,9 @@ No window, no database, no real payment, no network.
 
 open -> confirmed -> preparing -> ready -> paid -> closed
 
-An open order can also be cancelled. We can add or remove items only when the
-order is open. Any other change is refused.
+An open order can also be cancelled.
+If the kitchen closes before all lines are ready, the order goes back from preparing to confirmed (can be sent again later).
+Items can be added or removed only when the order is open. Other changes are refused.
 
 ## Rules that must always be true
 
@@ -122,14 +123,17 @@ O0003;T03;OPEN;0;
 
 ## Kitchen
 
+- The kitchen prepares one order at a time.
 - 2 cooks. Each cook = a thread. They take the confirmed lines one by one.
 - The preparation time will be simulated with a sleep.
-- A console option closes the kitchen: it interrupts the cooks, waits for them and the order stays in a valid state.
+- A console option closes the kitchen: it interrupts the cooks, waits for them and the order goes back to confirmed.
 
 ## Data shared between threads
 
-The status of the order and the number of finished lines. Only KitchenService
-changes them, inside synchronized code. We read the result after join.
+The two cooks share one KitchenBoard: the line queue and the number of finished lines.
+All access uses synchronized methods.
+
+Only the main thread changes the order status, before the cooks start and after they join.
 
 ## Reports
 

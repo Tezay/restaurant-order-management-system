@@ -24,6 +24,11 @@ Team Project 7 - CEWP MOD4 Java Programming, Concordia University, Fall 2026.
 mvn verify
 ```
 
+## Design
+
+- [Analysis](docs/analysis.md)
+- [Class diagram and packages](docs/design/class-diagram.md)
+
 ## Workflow
 
 - `main` only changes through pull requests, merged with squash and one approval.
