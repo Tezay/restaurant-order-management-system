@@ -3,23 +3,34 @@ package model;
 import java.math.BigDecimal;
 
 public class FoodItem extends MenuItem {
+    private int preparationMinutes;
+    private DietaryTag dietaryTag;
 
     public FoodItem(String id, String name, BigDecimal price, Category category, boolean available,
                     int preparationMinutes, DietaryTag dietaryTag) {
         super(id, name, price, category, available);
+        this.preparationMinutes = preparationMinutes;
+        this.dietaryTag = dietaryTag;
     }
 
     public DietaryTag getDietaryTag() {
-        throw new UnsupportedOperationException();
+        return this.dietaryTag;
     }
 
     @Override
     public int getPreparationMinutes() {
-        throw new UnsupportedOperationException();
+        return this.preparationMinutes;
     }
 
     @Override
     public String describe() {
-        throw new UnsupportedOperationException();
+        return "=== Item #" + this.getId() + " ===" +
+            "\n-- " + this.getName() + " --" +
+            "\nPrice: " + this.getPrice() +
+            "\nCategory: " + this.getCategory() +
+            "\nAvailable: " + this.isAvailable() +
+            "\nPreparation time: " + this.preparationMinutes +
+            "\nDietary Tag: " + this.dietaryTag +
+            "\n=========";
     }
 }
