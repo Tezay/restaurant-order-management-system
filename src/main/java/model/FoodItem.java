@@ -17,13 +17,14 @@ public class FoodItem extends MenuItem {
         return this.dietaryTag;
     }
 
+    @Override
     public int getPreparationMinutes() {
         return this.preparationMinutes;
     }
 
     @Override
     public String describe() {
-        return "=== Order #" + this.getId() + " ===" +
+        return "=== Item #" + this.getId() + " ===" +
             "\n-- " + this.getName() + " --" +
             "\nPrice: " + this.getPrice() +
             "\nCategory: " + this.getCategory() +

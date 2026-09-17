@@ -13,13 +13,26 @@ public class Beverage extends MenuItem {
         this.alcoholic = alcoholic;
     }
 
+    public int getVolumeMl() {
+        return this.volumeMl;
+    }
+
+    /**
+     * Beverage has no preparation time.
+     * @return always returns {@code 0}
+     */
+    @Override
+    public int getPreparationMinutes() {
+        return 0;
+    }
+
     public boolean isAlcoholic() {
         return this.alcoholic;
     }
 
     @Override
     public String describe() {
-        return "=== Order #" + this.getId() + " ===" +
+        return "=== Item #" + this.getId() + " ===" +
             "\n-- " + this.getName() + " --" +
             "\nPrice: " + this.getPrice() +
             "\nCategory: " + this.getCategory() +

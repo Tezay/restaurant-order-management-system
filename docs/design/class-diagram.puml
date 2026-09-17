@@ -62,6 +62,7 @@ package model {
     - volumeMl : int
     - alcoholic : boolean
     + Beverage(id : String, name : String, price : BigDecimal, category : Category, available : boolean, volumeMl : int, alcoholic : boolean)
+    + getVolumeMl() : int
     + isAlcoholic() : boolean
     + getPreparationMinutes() : int
     + describe() : String

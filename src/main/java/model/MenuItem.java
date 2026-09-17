@@ -51,5 +51,7 @@ public abstract class MenuItem implements Identifiable, Comparable<MenuItem> {
         return this.id.compareTo(other.id);
     }
 
+    public abstract int getPreparationMinutes();
+
     public abstract String describe();
 }
