@@ -7,11 +7,17 @@ import java.math.BigDecimal;
 
 public class CardPayment implements PaymentMethod {
 
+    private final String cardNumber;
+
     public CardPayment(String cardNumber) {
+        this.cardNumber = cardNumber;
     }
 
     @Override
     public BigDecimal pay(BigDecimal amountDue) throws RestaurantException {
-        throw new UnsupportedOperationException();
+        if (cardNumber == null || !cardNumber.matches("\\d{16}")) {
+            throw new RestaurantException("The card number must have 16 digits");
+        }
+        return BigDecimal.ZERO.setScale(2);
     }
 }
