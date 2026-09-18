@@ -35,7 +35,7 @@ class PaymentTest {
 
     void cardPaymentTest() throws RestaurantException {
         PaymentMethod p3 = new CardPayment("1234567891234567");
-        assertEquals(new BigDecimal("13.30"), p3.pay(new BigDecimal("13.30")));
+        assertEquals( BigDecimal.ZERO, p3.pay(new BigDecimal("13.30")));
     }
 
     @Test

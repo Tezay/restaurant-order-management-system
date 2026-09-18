@@ -15,9 +15,9 @@ public class CardPayment implements PaymentMethod {
 
     @Override
     public BigDecimal pay(BigDecimal amountDue) throws RestaurantException {
-        if (cardNumber == null || cardNumber.length() != 16 ){
+        if (cardNumber == null || !cardNumber.matches("\\d{16}" )){
             throw new RestaurantException("You must enter 16 digits");
         }
-        return amountDue;
+        return BigDecimal.ZERO;
     }
 }
