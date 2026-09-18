@@ -139,7 +139,7 @@ package model {
     PERCENT_15
     PERCENT_18
     PERCENT_20
-    - percent : int
+    - rate : BigDecimal
     + applyTo(subtotal : BigDecimal) : BigDecimal
   }
 
