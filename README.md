@@ -10,7 +10,7 @@ Team Project 7 - CEWP MOD4 Java Programming, Concordia University, Fall 2026.
 |---------|------------------------------------------------|
 | Romain  | [@Buffaloexe](https://github.com/Buffaloexe)   |
 | Tiffany | [@tiffvgch](https://github.com/tiffvgch)       |
-| Abigael | [@abi-mlrt](https://github.com/abi-mlrt)       |
+| Abigaïl | [@abi-mlrt](https://github.com/abi-mlrt)       |
 | Eliot   | [@Tezay](https://github.com/Tezay)             |
 
 ## Requirements
