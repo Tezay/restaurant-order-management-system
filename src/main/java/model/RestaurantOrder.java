@@ -165,7 +165,7 @@ public class RestaurantOrder implements Identifiable {
         }
 
         public BigDecimal getAmount() {
-            throw new UnsupportedOperationException();
+            return item.getPrice().multiply(BigDecimal.valueOf(quantity));
         }
     }
 }
