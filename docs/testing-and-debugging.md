@@ -9,11 +9,14 @@
 | Table already busy | a second order on the same table | refused | |
 | Ordering | two items with the same name, or the same price | the id decides the order | as expected (`MenuItemComparatorTest`) |
 | Payment state | pay before READY, or pay twice | refused, nothing changes | |
-| Kitchen | several lines to prepare, plus an interruption | the exact number of finished lines, every cook stops | |
+| Kitchen | several lines to prepare, plus an interruption | the exact number of finished lines, every cook stops | as expected (`KitchenTest`, `KitchenServiceTest`) |
 
 ## Concurrency
 
 Runs of the kitchen test, with new threads each time, result read after the join:
+
+- `KitchenTest`, 10 runs: always 3 finished lines, and after an interrupt every cook stopped.
+- `KitchenServiceTest`, 10 runs: the order is READY after waitUntilDone, and back to CONFIRMED after close.
 
 ## Defects
 
