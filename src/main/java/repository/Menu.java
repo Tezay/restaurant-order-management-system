@@ -8,6 +8,6 @@ public class Menu extends Repository<MenuItem> implements Iterable<MenuItem> {
 
     @Override
     public Iterator<MenuItem> iterator() {
-        throw new UnsupportedOperationException();
+        return getAll().iterator();
     }
 }
