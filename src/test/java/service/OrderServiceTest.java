@@ -44,7 +44,8 @@ class OrderServiceTest {
     @Test
     @DisplayName("Verify if second order on a busy table -> not possible")
     void impossibleSecondOrderOnBusyTable() throws RestaurantException {
-        orderService.openOrder("T01");
+        RestaurantOrder order = orderService.openOrder("T01");
+        assertEquals("O0001", order.getId());
 
         assertThrows(RestaurantException.class, () -> orderService.openOrder("T01"));
     }

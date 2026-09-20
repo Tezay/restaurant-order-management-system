@@ -58,7 +58,7 @@ public class OrderService {
         if (activeTableIds.contains(tableId)) {
             throw new RestaurantException("Table busy");
         }
-        RestaurantOrder order = new RestaurantOrder("O " + String.format("O%04d", nextOrderNumber), tableId);
+        RestaurantOrder order = new RestaurantOrder(String.format("O%04d", nextOrderNumber), tableId);
 
         orders.add(order);
         activeTableIds.add(tableId);
