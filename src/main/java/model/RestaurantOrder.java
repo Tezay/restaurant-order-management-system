@@ -2,8 +2,10 @@ package model;
 
 import contract.Identifiable;
 import exception.RestaurantException;
+import repository.Menu;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,10 +16,9 @@ public class RestaurantOrder implements Identifiable {
     private String tableId;
     private OrderStatus status;
     private TipRate tipRate;
-    private Map<MenuItem, Integer> items = new HashMap<>();
+    private List<OrderLine> lines = new ArrayList<>();
 
-    private static final BigDecimal GST_RATE = new BigDecimal("0.05"); //TPS (federale tax) : 5%
-    private static final BigDecimal QST_RATE = new BigDecimal("0.09975"); //TVQ (provincial tax) : 9.975%
+    private static final BigDecimal TAX_RATE = new BigDecimal("0.14975");
 
     public RestaurantOrder(String id, String tableId) {
         this.id = id;
@@ -45,7 +46,9 @@ public class RestaurantOrder implements Identifiable {
         RestaurantOrder order = new RestaurantOrder(id,tableId);
         order.status = status;
         order.tipRate = tipRate;
-        order.items = items;
+        for(Map.Entry<MenuItem, Integer> entry : items.entrySet()){
+            order.lines.add(new OrderLine(entry.getKey(), entry.getValue()));
+        }
         return order;
     }
 
@@ -63,28 +66,32 @@ public class RestaurantOrder implements Identifiable {
     }
 
     public List<OrderLine> getLines() {
-        List<OrderLine> orderLines = new ArrayList<>();
-        for (Map.Entry<MenuItem, Integer> entry : items.entrySet()){
-            orderLines.add(new OrderLine(entry.getKey(),entry.getValue()));
-        }
-        return orderLines;
+        return new ArrayList<>(lines);
     }
 
     public void addItem(MenuItem item, int quantity) throws RestaurantException {
         if(item == null || quantity < 1){
             throw new RestaurantException("Invalid Item data.");
         }
+        if(status != OrderStatus.OPEN){
+            throw new RestaurantException("Order must be OPEN to add items.");
+        }
         if(!item.isAvailable()){
             throw new RestaurantException("Item not available.");
         }
-        items.put(item,quantity);
+        OrderLine exist = findItemById(item.getId());
+        if(exist != null){
+            exist.quantity += quantity;
+        } else {
+            lines.add(new OrderLine(item, quantity));
+        }
     }
 
-    public MenuItem findItemById(String itemId){
-        MenuItem exist = null;
-        for(MenuItem item : items.keySet()){
-            if(item.getId().equals(itemId)){
-                exist = item;
+    private OrderLine findItemById(String itemId){
+        OrderLine exist = null;
+        for(OrderLine line : lines){
+            if(line.getItem().getId().equals(itemId)){
+                exist = line;
                 break;
             }
         }
@@ -92,19 +99,25 @@ public class RestaurantOrder implements Identifiable {
     }
 
     public void updateQuantity(String itemId, int quantity) throws RestaurantException {
-        MenuItem exist = findItemById(itemId);
+        if(status != OrderStatus.OPEN){
+            throw new RestaurantException("Order must be OPEN to update items.");
+        }
+        OrderLine exist = findItemById(itemId);
         if(exist == null || quantity < 1){
             throw new RestaurantException("Invalid Item data.");
         }
-        items.put(exist,quantity);
+        exist.quantity = quantity;
     }
 
     public void removeItem(String itemId) throws RestaurantException {
-        MenuItem exist = findItemById(itemId);
+        if(status != OrderStatus.OPEN){
+            throw new RestaurantException("Order must be OPEN to remove items.");
+        }
+        OrderLine exist = findItemById(itemId);
         if(exist == null){
             throw new RestaurantException("Invalid Item Id.");
         }
-        items.remove(exist);
+        lines.remove(exist);
     }
 
     public void moveTo(OrderStatus next) throws RestaurantException {
@@ -120,27 +133,21 @@ public class RestaurantOrder implements Identifiable {
 
     public BigDecimal getSubtotal() {
         BigDecimal subTotal = BigDecimal.ZERO;
-        for(Map.Entry<MenuItem,Integer> entry : items.entrySet()){
-            MenuItem item = entry.getKey();
-            Integer quantity = entry.getValue();
-            BigDecimal lineAmount = item.getPrice().multiply(BigDecimal.valueOf(quantity));
-            subTotal = subTotal.add(lineAmount);
+        for(OrderLine line : lines){
+            subTotal = subTotal.add(line.getAmount());
         }
         return subTotal;
     }
 
     public BigDecimal getTax() {
-        BigDecimal subTotal = getSubtotal();
-        BigDecimal gst = subTotal.multiply(GST_RATE);
-        BigDecimal qst = subTotal.add(gst).multiply(QST_RATE);
-        return gst.add(qst);
+        return getSubtotal().multiply(TAX_RATE).setScale(2, RoundingMode.HALF_UP);
     }
 
     public BigDecimal getTip() {
         if(tipRate == null){
             return BigDecimal.ZERO;
         }
-        return tipRate.applyTo(getSubtotal());
+        return tipRate.applyTo(getSubtotal()).setScale(2, RoundingMode.HALF_UP);
     }
 
     public BigDecimal getTotal() {

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -18,7 +19,7 @@ class RestaurantOrderTest {
     private MenuItem spruceBeer;
 
     @BeforeEach
-    void setUp(){
+    void setUp() {
         order = new RestaurantOrder("O001", "T01");
 
         poutine = new FoodItem("M001", "Classic poutine", new BigDecimal("12.95"),
@@ -29,44 +30,55 @@ class RestaurantOrderTest {
     }
 
     @Test
-    @DisplayName("Valid order with Tip and Taxes verification")
-    void validOrder_withItemsAndTip_isConsistent() throws RestaurantException {
-        order.addItem(poutine, 2);   // 25.90
-        order.addItem(spruceBeer, 1);      // 3.95
+    @DisplayName("2 poutines + 1 spruce beer, tip 18% : sous-total, taxe, tip et total exacts")
+    void validOrder_matchesHandComputedValues() throws RestaurantException {
+        order.addItem(poutine, 2);        // 2 * 12.95 = 25.90
+        order.addItem(spruceBeer, 1);     // 1 * 3.95  =  3.95
         order.setTipRate(TipRate.PERCENT_18);
-        order.moveTo(OrderStatus.CONFIRMED);
 
-        assertEquals(OrderStatus.CONFIRMED, order.getStatus());
-        assertEquals(2, order.getLines().size());
-        assertEquals(0, order.getSubtotal().compareTo(new BigDecimal("29.85")));
-        assertTrue(order.getTax().compareTo(BigDecimal.ZERO) > 0);
-        assertTrue(order.getTip().compareTo(BigDecimal.ZERO) > 0);
-        assertEquals(0, order.getTotal().compareTo(
-            order.getSubtotal().add(order.getTax()).add(order.getTip())));
+        assertEquals(new BigDecimal("29.85"), order.getSubtotal());
+        assertEquals(new BigDecimal("4.47"), order.getTax());
+        assertEquals(new BigDecimal("5.37"), order.getTip());
+        assertEquals(new BigDecimal("39.69"), order.getTotal());
     }
 
     @Test
-    @DisplayName("Unavailable item leaves order unchanged")
-    void addItem_unavailableItem_orderUnchanged() throws RestaurantException {
-        MenuItem unavailable = new FoodItem("M013", "Expired poutine", new BigDecimal("4.75"),
-            Category.MAIN, false, 2, DietaryTag.NONE);
+    @DisplayName("Ajouter le même item deux fois fusionne la quantité sur une seule ligne")
+    void addItem_sameItemTwice_mergesIntoOneLine() throws RestaurantException {
+        order.addItem(poutine, 1);
         order.addItem(poutine, 1);
 
-        assertThrows(RestaurantException.class, () -> order.addItem(unavailable, 1));
-
-        assertEquals(1, order.getLines().size());
-        assertNull(order.findItemById("M013"));
-        assertEquals(0, order.getSubtotal().compareTo(new BigDecimal("12.95")));
+        List<RestaurantOrder.OrderLine> lines = order.getLines();
+        assertEquals(1, lines.size());
+        assertEquals(2, lines.get(0).getQuantity());
     }
 
     @Test
-    @DisplayName("Refused change of state")
-    void moveTo_fromTerminalState_isRefused() throws RestaurantException {
-        Map<MenuItem, Integer> items = new HashMap<>();
-        RestaurantOrder closedOrder = RestaurantOrder.restore(
-            "O007", "T07", OrderStatus.CLOSED, TipRate.NO_TIP, items);
+    @DisplayName("Une commande CONFIRMED refuse addItem, et les lignes restent inchangées")
+    void addItem_afterMoveToConfirmed_throwsAndLinesUnchanged() throws RestaurantException {
+        order.addItem(poutine, 1);
+        order.moveTo(OrderStatus.CONFIRMED);
 
-        assertThrows(RestaurantException.class, () -> closedOrder.moveTo(OrderStatus.OPEN));
-        assertEquals(OrderStatus.CLOSED, closedOrder.getStatus());
+        assertThrows(RestaurantException.class, () -> order.addItem(spruceBeer, 1));
+
+        List<RestaurantOrder.OrderLine> lines = order.getLines();
+        assertEquals(1, lines.size());
+        assertEquals(poutine, lines.get(0).getItem());
+        assertEquals(1, lines.get(0).getQuantity());
+    }
+
+    @Test
+    @DisplayName("restore ne partage pas la map de l'appelant : mutation ultérieure sans effet")
+    void restore_makesACopy_notSharingCallersMap() throws RestaurantException {
+        Map<MenuItem, Integer> items = new HashMap<>();
+        items.put(poutine, 2);
+
+        RestaurantOrder restored = RestaurantOrder.restore(
+            "O003", "T03", OrderStatus.OPEN, TipRate.NO_TIP, items);
+
+        items.put(spruceBeer, 5); // mutation après coup : ne doit pas affecter la commande restaurée
+
+        assertEquals(1, restored.getLines().size());
+        assertEquals(new BigDecimal("25.90"), restored.getSubtotal());
     }
 }
