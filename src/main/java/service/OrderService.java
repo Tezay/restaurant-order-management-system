@@ -58,7 +58,7 @@ public class OrderService {
         if (activeTableIds.contains(tableId)) {
             throw new RestaurantException("Table busy");
         }
-        RestaurantOrder order = new RestaurantOrder("O " + String.format("%03d", nextOrderNumber), tableId);
+        RestaurantOrder order = new RestaurantOrder("O " + String.format("O%04d", nextOrderNumber), tableId);
 
         orders.add(order);
         activeTableIds.add(tableId);
@@ -129,16 +129,22 @@ public class OrderService {
     public BigDecimal pay(String orderId, TipRate tipRate, PaymentMethod method) throws RestaurantException {
         RestaurantOrder order = findOrder(orderId);
 
-        if (order.getStatus() != OrderStatus.READY){
+        if (order.getStatus() != OrderStatus.READY) {
             throw new RestaurantException("Order need to be READY to pay");
         }
 
         order.setTipRate(tipRate);
         BigDecimal total = order.getTotal();
-        BigDecimal change = method.pay(total);
-        order.moveTo(OrderStatus.PAID);
 
-        return change;
+        try {
+            BigDecimal change = method.pay(total);
+            order.moveTo(OrderStatus.PAID);
+            return change;
+
+        } catch (RestaurantException e) {
+            order.setTipRate(TipRate.NO_TIP);
+            throw e;
+        }
     }
 
     public void close(String orderId) throws RestaurantException {
