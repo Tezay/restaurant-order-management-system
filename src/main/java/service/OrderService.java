@@ -1,34 +1,28 @@
 package service;
 
 import contract.PaymentMethod;
-
 import exception.RestaurantException;
-
-import model.*;
+import model.DiningTable;
 import model.MenuItem;
 import model.OrderStatus;
-
+import model.RestaurantOrder;
+import model.TipRate;
 import repository.Menu;
 import repository.Repository;
 
 import java.math.BigDecimal;
-import java.util.*;
-
-// OrderService in the service package.
-//OKAY -> open, add, update, remove, cancel, confirm, pay and close
-//OKAY -> attention pay check everything before changing anything: a failed call changes nothing
-//OKAY -> one active order per table, with a Set of the table ids
-//OKAY -> the next order id continues after the biggest id loaded from orders.txt
-//OKAY -> pay: the tip is chosen here, and the change comes from the payment method
-//tests: second order on a busy table, unavailable item, pay before READY, pay twice
-//Needs "Implement the order and the tables", "Implement the repository and the menu".
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 public class OrderService {
 
     private final Menu menu;
     private final Repository<DiningTable> tables;
     private final Repository<RestaurantOrder> orders;
-    private final Set<String> activeTableIds = new HashSet<>(); // id en memoire
+    private final Set<String> activeTableIds = new HashSet<>();
     private int nextOrderNumber;
 
     public OrderService(Menu menu, Repository<DiningTable> tables, Repository<RestaurantOrder> orders) {
@@ -50,7 +44,7 @@ public class OrderService {
     }
 
     private int extractNumber(String orderId) {
-        String digitsOnly = orderId.replaceAll("[^0-9]", "");// que chiffres
+        String digitsOnly = orderId.replaceAll("[^0-9]", "");
         if (digitsOnly.isEmpty()) {
             return 0;
         }
@@ -83,7 +77,7 @@ public class OrderService {
         }
         MenuItem item = findMenuItem(itemId);
         if (!item.isAvailable()) {
-            throw new RestaurantException("Item not available");// boolean
+            throw new RestaurantException("Item not available");
         }
         order.addItem(item, quantity);
     }
@@ -116,8 +110,8 @@ public class OrderService {
             throw new RestaurantException("Only OPEN order can be cancelled");
         }
 
-        order.moveTo(OrderStatus.CANCELLED); // changement de statut
-        activeTableIds.remove(order.getTableId()); // redeviens vide
+        order.moveTo(OrderStatus.CANCELLED);
+        activeTableIds.remove(order.getTableId());
     }
 
     public void confirm(String orderId) throws RestaurantException {
@@ -141,7 +135,7 @@ public class OrderService {
 
         order.setTipRate(tipRate);
         BigDecimal total = order.getTotal();
-        BigDecimal change = method.pay(total); // cash or card
+        BigDecimal change = method.pay(total);
         order.moveTo(OrderStatus.PAID);
 
         return change;
@@ -161,18 +155,18 @@ public class OrderService {
         Optional<RestaurantOrder> order = orders.findById(orderId);
 
         if (order.isEmpty()) {
-            throw new RestaurantException("Order is empty");
+            throw new RestaurantException("Order not found");
         }
         return order.get();
     }
 
-    public MenuItem findMenuItem(String itemId) throws RestaurantException {
-        for (MenuItem item : menu) {
-            if (item.getId().equals(itemId)) {
-                return item;
-            }
+    private MenuItem findMenuItem(String itemId) throws RestaurantException {
+        Optional<MenuItem> item = menu.findById(itemId);
+
+        if (item.isEmpty()) {
+            throw new RestaurantException("Menu item not found");
         }
-        throw new RestaurantException("Menu item not found");
+        return item.get();
     }
 
     public List<RestaurantOrder> getActiveOrders() {
