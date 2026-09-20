@@ -2,12 +2,10 @@ package model;
 
 import contract.Identifiable;
 import exception.RestaurantException;
-import repository.Menu;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -45,7 +43,7 @@ public class RestaurantOrder implements Identifiable {
         }
         RestaurantOrder order = new RestaurantOrder(id,tableId);
         order.status = status;
-        order.tipRate = tipRate;
+        order.setTipRate(tipRate);
         for(Map.Entry<MenuItem, Integer> entry : items.entrySet()){
             order.lines.add(new OrderLine(entry.getKey(), entry.getValue()));
         }
@@ -127,8 +125,8 @@ public class RestaurantOrder implements Identifiable {
         status = next;
     }
 
-    public void setTipRate(TipRate tipRate) { //add throws RestaurantException if null is not considered as NO_TIP
-        this.tipRate = tipRate;
+    public void setTipRate(TipRate tipRate) {
+        this.tipRate = tipRate == null ? TipRate.NO_TIP : tipRate;
     }
 
     public BigDecimal getSubtotal() {
@@ -144,10 +142,7 @@ public class RestaurantOrder implements Identifiable {
     }
 
     public BigDecimal getTip() {
-        if(tipRate == null){
-            return BigDecimal.ZERO;
-        }
-        return tipRate.applyTo(getSubtotal()).setScale(2, RoundingMode.HALF_UP);
+        return tipRate.applyTo(getSubtotal());
     }
 
     public BigDecimal getTotal() {

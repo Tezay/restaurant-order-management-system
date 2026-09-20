@@ -30,7 +30,7 @@ class RestaurantOrderTest {
     }
 
     @Test
-    @DisplayName("2 poutines + 1 spruce beer, tip 18% : sous-total, taxe, tip et total exacts")
+    @DisplayName("2 poutines + 1 spruce beer with an 18% tip: exact subtotal, tax, tip and total")
     void validOrder_matchesHandComputedValues() throws RestaurantException {
         order.addItem(poutine, 2);        // 2 * 12.95 = 25.90
         order.addItem(spruceBeer, 1);     // 1 * 3.95  =  3.95
@@ -43,7 +43,7 @@ class RestaurantOrderTest {
     }
 
     @Test
-    @DisplayName("Ajouter le même item deux fois fusionne la quantité sur une seule ligne")
+    @DisplayName("The same item added twice gives one line with a bigger quantity")
     void addItem_sameItemTwice_mergesIntoOneLine() throws RestaurantException {
         order.addItem(poutine, 1);
         order.addItem(poutine, 1);
@@ -54,7 +54,7 @@ class RestaurantOrderTest {
     }
 
     @Test
-    @DisplayName("Une commande CONFIRMED refuse addItem, et les lignes restent inchangées")
+    @DisplayName("A CONFIRMED order refuses addItem and keeps the same lines")
     void addItem_afterMoveToConfirmed_throwsAndLinesUnchanged() throws RestaurantException {
         order.addItem(poutine, 1);
         order.moveTo(OrderStatus.CONFIRMED);
@@ -68,7 +68,7 @@ class RestaurantOrderTest {
     }
 
     @Test
-    @DisplayName("restore ne partage pas la map de l'appelant : mutation ultérieure sans effet")
+    @DisplayName("restore copies the map: a later change does not touch the order")
     void restore_makesACopy_notSharingCallersMap() throws RestaurantException {
         Map<MenuItem, Integer> items = new HashMap<>();
         items.put(poutine, 2);
