@@ -76,7 +76,7 @@ class RestaurantOrderTest {
         RestaurantOrder restored = RestaurantOrder.restore(
             "O003", "T03", OrderStatus.OPEN, TipRate.NO_TIP, items);
 
-        items.put(spruceBeer, 5); // mutation après coup : ne doit pas affecter la commande restaurée
+        items.put(spruceBeer, 5);
 
         assertEquals(1, restored.getLines().size());
         assertEquals(new BigDecimal("25.90"), restored.getSubtotal());

@@ -12,9 +12,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class RepositoryMenuTest {
+class RepositoryMenuTest {
     private Menu menu;
 
     private static class TestMenuItem extends MenuItem {
@@ -45,8 +46,8 @@ public class RepositoryMenuTest {
     @Test
     @DisplayName("Verify and refuse an already existing Id.")
     void testAddDuplicateIdThrowsException() throws RestaurantException {
-        MenuItem item1 = createItem("1", "Burger");
-        MenuItem item2 = createItem("1", "Cheeseburger");
+        MenuItem item1 = createItem("M001", "Classic poutine");
+        MenuItem item2 = createItem("M001", "Double poutine");
 
         menu.add(item1);
 
@@ -59,9 +60,9 @@ public class RepositoryMenuTest {
     @DisplayName("Use explicit iterator to traverse the list with the Ids in the right order.")
     void testIteratorExplicitLoopInIdOrder() throws RestaurantException {
         // adding with no order
-        MenuItem item3 = createItem("30", "Classic poutine");
-        MenuItem item1 = createItem("10", "Poutine à la merde");
-        MenuItem item2 = createItem("20", "Poutine with fries");
+        MenuItem item3 = createItem("M003", "Maple poutine");
+        MenuItem item1 = createItem("M001", "Classic poutine");
+        MenuItem item2 = createItem("M002", "Double poutine");
 
         menu.add(item3);
         menu.add(item1);
@@ -77,15 +78,15 @@ public class RepositoryMenuTest {
         }
 
         assertEquals(3, iteratedIds.size());
-        assertEquals("10", iteratedIds.get(0));
-        assertEquals("20", iteratedIds.get(1));
-        assertEquals("30", iteratedIds.get(2));
+        assertEquals("M001", iteratedIds.get(0));
+        assertEquals("M002", iteratedIds.get(1));
+        assertEquals("M003", iteratedIds.get(2));
     }
 
     @Test
     @DisplayName("getAll() should return a non modifiable list (read-only).")
     void testGetAllIsReadOnly() throws RestaurantException {
-        MenuItem item = createItem("1", "Frites");
+        MenuItem item = createItem("M001", "Sweet potato fries");
         menu.add(item);
 
         assertThrows(UnsupportedOperationException.class, () -> menu.getAll().clear());

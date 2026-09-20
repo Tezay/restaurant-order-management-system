@@ -3,7 +3,11 @@ package repository;
 import contract.Identifiable;
 import exception.RestaurantException;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
+import java.util.TreeMap;
 
 public class Repository<T extends Identifiable> {
     private final Map<String, T> items = new TreeMap<>();
@@ -26,13 +30,10 @@ public class Repository<T extends Identifiable> {
         if(id == null){
             return Optional.empty();
         }
-        // get() would only return null if no key is absent
-        // ofNullable return an empty Optional instead of null
         return Optional.ofNullable(items.get(id));
     }
 
     public Collection<T> getAll() {
-        // read only
         return Collections.unmodifiableCollection(items.values());
     }
 }
