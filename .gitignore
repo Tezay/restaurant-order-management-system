@@ -42,3 +42,6 @@ bin/
 # OS metadata
 .DS_Store
 Thumbs.db
+
+# Application runtime data
+data/runtime/

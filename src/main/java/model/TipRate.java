@@ -1,17 +1,21 @@
 package model;
 
+import exception.RestaurantException;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 public enum TipRate {
-    NO_TIP("0.00"),
-    PERCENT_15("0.15"),
-    PERCENT_18("0.18"),
-    PERCENT_20("0.20");
+    NO_TIP(0, "0.00"),
+    PERCENT_15(15, "0.15"),
+    PERCENT_18(18, "0.18"),
+    PERCENT_20(20, "0.20");
 
+    private final int percent;
     private final BigDecimal rate;
 
-    TipRate(String rate) {
+    TipRate(int percent, String rate) {
+        this.percent = percent;
         this.rate = new BigDecimal(rate);
     }
 
@@ -21,5 +25,23 @@ public enum TipRate {
      */
     public BigDecimal applyTo(BigDecimal subtotal) {
         return subtotal.multiply(rate).setScale(2, RoundingMode.HALF_UP);
+    }
+
+    public int getPercent() {
+        return percent;
+    }
+
+    /**
+     * @param percent the percent written in orders.txt
+     * @return the matching rate
+     * @throws RestaurantException if no rate uses this percent
+     */
+    public static TipRate fromPercent(int percent) throws RestaurantException {
+        for (TipRate tipRate : values()) {
+            if (tipRate.getPercent() == percent) {
+                return tipRate;
+            }
+        }
+        throw new RestaurantException("Unknown tip percent: " + percent);
     }
 }

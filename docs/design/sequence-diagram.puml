@@ -1,0 +1,68 @@
+@startuml sequence-diagram
+title One order, from open to closed
+
+actor Server
+participant ConsoleMenu
+participant OrderService
+participant "order : RestaurantOrder" as Order
+participant KitchenService
+participant KitchenBoard
+participant "cook 1 : Thread" as Cook1
+participant "cook 2 : Thread" as Cook2
+participant "cash : CashPayment" as Payment
+
+Server -> ConsoleMenu : "Open an order"
+ConsoleMenu -> ConsoleMenu : readLine("Table id")
+ConsoleMenu -> OrderService : openOrder("T06")
+OrderService -> Order : new RestaurantOrder("O0011", "T06")
+
+Server -> ConsoleMenu : "Add an item"
+ConsoleMenu -> OrderService : addItem("O0011", "M001", 2)
+OrderService -> Order : addItem(item, 2)
+
+alt the item is not available
+  ConsoleMenu -> OrderService : addItem("O0011", "M013", 1)
+  OrderService --> ConsoleMenu : RestaurantException, the order does not change
+end
+
+Server -> ConsoleMenu : "Confirm an order"
+ConsoleMenu -> OrderService : confirm("O0011")
+OrderService -> Order : moveTo(CONFIRMED)
+
+Server -> ConsoleMenu : "Send an order to the kitchen"
+ConsoleMenu -> KitchenService : start(order)
+KitchenService -> Order : moveTo(PREPARING)
+KitchenService -> Cook1 : start()
+KitchenService -> Cook2 : start()
+
+par
+  Cook1 -> KitchenBoard : synchronized takeNext()
+  Cook1 -> KitchenBoard : synchronized markFinished()
+else
+  Cook2 -> KitchenBoard : synchronized takeNext()
+  Cook2 -> KitchenBoard : synchronized markFinished()
+end
+
+alt the server waits for the end
+  ConsoleMenu -> KitchenService : waitUntilDone()
+else the server closes the kitchen
+  ConsoleMenu -> KitchenService : close()
+  KitchenService -> Cook1 : interrupt()
+  KitchenService -> Cook2 : interrupt()
+end
+
+KitchenService -> Cook1 : join()
+KitchenService -> Cook2 : join()
+KitchenService -> Order : moveTo(READY), or moveTo(CONFIRMED) if lines are missing
+
+Server -> ConsoleMenu : "Pay an order"
+ConsoleMenu -> OrderService : pay("O0011", PERCENT_15, cash)
+OrderService -> Payment : pay(total)
+Payment --> OrderService : change
+OrderService -> Order : moveTo(PAID)
+
+Server -> ConsoleMenu : "Close an order"
+ConsoleMenu -> OrderService : close("O0011")
+OrderService -> Order : moveTo(CLOSED)
+
+@enduml
