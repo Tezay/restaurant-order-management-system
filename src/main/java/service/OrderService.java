@@ -30,6 +30,15 @@ public class OrderService {
         this.tables = tables;
         this.orders = orders;
         this.nextOrderNumber = computeNextOrderNumber();
+        markLoadedTablesAsBusy();
+    }
+
+    private void markLoadedTablesAsBusy() {
+        for (RestaurantOrder order : orders.getAll()) {
+            if (order.getStatus().isActive()) {
+                activeTableIds.add(order.getTableId());
+            }
+        }
     }
 
     private int computeNextOrderNumber() {

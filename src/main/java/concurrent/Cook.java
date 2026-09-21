@@ -6,7 +6,8 @@ import java.util.Optional;
 
 public class Cook implements Runnable {
 
-    private static final long MS_PER_MINUTE = 100; // one preparation minute lasts 100ms in reality
+    // one preparation minute lasts 100 ms, so a demo does not take real minutes
+    private static final long MS_PER_MINUTE = 100;
     private final KitchenBoard board;
 
     public Cook(KitchenBoard board) {
@@ -24,9 +25,9 @@ public class Cook implements Runnable {
 
             try {
                 Thread.sleep(line.get().getItem().getPreparationMinutes() * MS_PER_MINUTE);
-            }
-            catch (InterruptedException e) {
-                Thread.currentThread().interrupt(); // ensure the correct interruption of the cooker if needed
+            } catch (InterruptedException e) {
+                // sleep cleared the flag -> put it back so the caller knows this cook was interrupted
+                Thread.currentThread().interrupt();
                 return;
             }
 

@@ -16,10 +16,6 @@ public class KitchenBoard {
         this.pending = new LinkedList<>(lines);
     }
 
-    /**
-     * @return an Optional containing the next pending order line,
-     *         or an empty Optional if no order line is pending
-     */
     public synchronized Optional<OrderLine> takeNext() {
         return Optional.ofNullable(pending.poll());
     }

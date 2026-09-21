@@ -18,6 +18,7 @@ import repository.Menu;
 import repository.Repository;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -48,6 +49,15 @@ class OrderServiceTest {
         assertEquals("O0001", order.getId());
 
         assertThrows(RestaurantException.class, () -> orderService.openOrder("T01"));
+    }
+
+    @Test
+    @DisplayName("Verify if a table is still busy after the orders are loaded from the file")
+    void impossibleOrderOnATableBusyInTheLoadedOrders() throws RestaurantException {
+        orders.add(RestaurantOrder.restore("O0006", "T01", OrderStatus.OPEN, TipRate.NO_TIP, Map.of()));
+        OrderService afterRestart = new OrderService(menu, tables, orders);
+
+        assertThrows(RestaurantException.class, () -> afterRestart.openOrder("T01"));
     }
 
     @Test
