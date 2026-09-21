@@ -46,7 +46,8 @@ package model {
     + isAvailable() : boolean
     + compareTo(other : MenuItem) : int
     + {abstract} getPreparationMinutes() : int
-    + {abstract} describe() : String
+    + describe() : String
+    # {abstract} details() : String
   }
 
   class FoodItem {
@@ -55,7 +56,7 @@ package model {
     + FoodItem(id : String, name : String, price : BigDecimal, category : Category, available : boolean, preparationMinutes : int, dietaryTag : DietaryTag)
     + getDietaryTag() : DietaryTag
     + getPreparationMinutes() : int
-    + describe() : String
+    # details() : String
   }
 
   class Beverage {
@@ -65,7 +66,7 @@ package model {
     + getVolumeMl() : int
     + isAlcoholic() : boolean
     + getPreparationMinutes() : int
-    + describe() : String
+    # details() : String
   }
 
   enum Category {

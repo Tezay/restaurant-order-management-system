@@ -23,14 +23,7 @@ public class FoodItem extends MenuItem {
     }
 
     @Override
-    public String describe() {
-        return "=== Item #" + this.getId() + " ===" +
-            "\n-- " + this.getName() + " --" +
-            "\nPrice: " + this.getPrice() +
-            "\nCategory: " + this.getCategory() +
-            "\nAvailable: " + this.isAvailable() +
-            "\nPreparation time: " + this.preparationMinutes +
-            "\nDietary Tag: " + this.dietaryTag +
-            "\n=========";
+    protected String details() {
+        return String.format("%3d min  %s", this.preparationMinutes, this.dietaryTag);
     }
 }

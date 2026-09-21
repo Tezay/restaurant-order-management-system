@@ -40,12 +40,6 @@ public abstract class MenuItem implements Identifiable, Comparable<MenuItem> {
         return this.available;
     }
 
-    /**
-     * Compare the current object with another one and sort by id ascending.
-     * @param other the object to be compared.
-     * @return a negative integer, zero or a positive integer if the current id is
-     * respectively less than, equal to or greater than the other Object's id.
-     */
     @Override
     public int compareTo(MenuItem other) {
         return this.id.compareTo(other.id);
@@ -53,5 +47,19 @@ public abstract class MenuItem implements Identifiable, Comparable<MenuItem> {
 
     public abstract int getPreparationMinutes();
 
-    public abstract String describe();
+    /**
+     * @return one line of the menu: id, name, price, category, then the part that
+     *         depends on the type of item
+     */
+    public String describe() {
+        String line = String.format("%-5s %-30s %8s %-9s %s",
+                this.id, this.name, this.price, this.category, details());
+
+        if (this.available) {
+            return line;
+        }
+        return line + "   (not available)";
+    }
+
+    protected abstract String details();
 }

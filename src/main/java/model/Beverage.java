@@ -17,10 +17,6 @@ public class Beverage extends MenuItem {
         return this.volumeMl;
     }
 
-    /**
-     * Beverage has no preparation time.
-     * @return always returns {@code 0}
-     */
     @Override
     public int getPreparationMinutes() {
         return 0;
@@ -31,14 +27,10 @@ public class Beverage extends MenuItem {
     }
 
     @Override
-    public String describe() {
-        return "=== Item #" + this.getId() + " ===" +
-            "\n-- " + this.getName() + " --" +
-            "\nPrice: " + this.getPrice() +
-            "\nCategory: " + this.getCategory() +
-            "\nAvailable: " + this.isAvailable() +
-            "\nAlcohol: " + this.alcoholic +
-            "\nVolume (ml): " + this.volumeMl +
-            "\n=========";
+    protected String details() {
+        if (this.alcoholic) {
+            return String.format("%3d ml  alcohol", this.volumeMl);
+        }
+        return String.format("%3d ml", this.volumeMl);
     }
 }

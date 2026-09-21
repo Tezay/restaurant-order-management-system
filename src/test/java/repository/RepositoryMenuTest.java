@@ -29,8 +29,8 @@ class RepositoryMenuTest {
         }
 
         @Override
-        public String describe() {
-            return getName();
+        protected String details() {
+            return "";
         }
     }
 
