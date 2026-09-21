@@ -7,18 +7,45 @@ import service.OrderService;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Scanner;
+
+import java.util.ArrayList;
+import java.util.Comparator;
 
 public class ConsoleMenu {
+    private final OrderService orderService;
+    private final KitchenService kitchen;
+    private final ReportService reports;
+    private final Menu menu;
+
+    private final Scanner scanner = new Scanner(System.in);
 
     public ConsoleMenu(OrderService orderService, KitchenService kitchen, ReportService reports, Menu menu) {
+        this.orderService = orderService;
+        this.kitchen = kitchen;
+        this.reports = reports;
+        this.menu = menu;
     }
 
     public void run() {
-        throw new UnsupportedOperationException();
+        List<Method> options = findOptions();
+
+        for (Method method : options){
+            MenuOption option = method.getAnnotation(MenuOption.class);
+            System.out.println(option.order() + " : " + option.label());
+        }
     }
 
     private List<Method> findOptions() {
-        throw new UnsupportedOperationException();
+        List<Method> options = new ArrayList<>();
+
+        for (Method method : app.ConsoleMenu.class.getMethods()) {
+            if(method.isAnnotationPresent(MenuOption.class)) {
+                options.add(method);
+            }
+        }
+        options.sort(Comparator.comparingInt(method -> method.getAnnotation(MenuOption.class).order()));
+        return options;
     }
 
     private int readInt(String prompt, int min, int max) {
