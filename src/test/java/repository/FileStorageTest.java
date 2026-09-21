@@ -1,17 +1,16 @@
 package repository;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class FileStorageTest {
 
@@ -19,45 +18,63 @@ class FileStorageTest {
     Path tempDir;
 
     @Test
-    @DisplayName("Valid tests.")
+    @DisplayName("A valid file loads every line")
     void loadsAllItemsFromAValidFile() throws IOException {
-        Path file = tempDir.resolve("menu-valid.csv");
+        Path file = tempDir.resolve("menu_items.txt");
         Files.writeString(file, """
-                FOOD,M1,Soup,8.50,STARTER,true,10,VEGAN
-                BEVERAGE,M2,Cola,3.00,DRINK,true,0,false
-                FOOD,M3,Steak,22.00,MAIN,true,20,NONE
+                M001;FOOD;Classic poutine;12.95;MAIN;true;8;NONE
+                M002;FOOD;Green salad;7.90;STARTER;false;3;VEGAN
+                M003;DRINK;Spruce beer;3.95;DRINK;true;355;false
                 """);
 
         Menu menu = new Menu();
         List<String> problems = FileStorage.load(file, FileStorage::parseMenuItem, menu);
 
-        assertTrue(problems.isEmpty(), "Valid file should produce no problems");
+        assertTrue(problems.isEmpty());
         assertEquals(3, menu.getAll().size());
-        assertTrue(menu.findById("M1").isPresent());
-        assertTrue(menu.findById("M2").isPresent());
-        assertTrue(menu.findById("M3").isPresent());
     }
 
     @Test
-    @DisplayName("try to catch each kind of bad lines and keep the valid ones.")
+    @DisplayName("Each kind of bad line is skipped and reported")
     void skipsEachKindOfBadLineAndKeepsTheValidOnes() throws IOException {
-        Path file = tempDir.resolve("menu-with-errors.csv");
+        Path file = tempDir.resolve("menu_items.txt");
         Files.writeString(file, """
-                FOOD,M1,Soup,8.50,STARTER,true,10,VEGAN
-                FOOD,M2,BadPrice,notanumber,STARTER,true,10,VEGAN
-                BEVERAGE,M3,Cola,3.00,BOGUS_CATEGORY,true,0,false
-                UNKNOWNTYPE,M4,Mystery,5.00,MAIN,true,0,NONE
-                FOOD,M5,TooShort
-                BEVERAGE,M6,Water,2.00,DRINK,true,0,false
+                M001;FOOD;Classic poutine;12.95;MAIN;true;8;NONE
+                M002;FOOD;Bad price;price;MAIN;true;8;NONE
+                M003;FOOD;Bad category;12.95;BOGUS;true;8;NONE
+                M004;PIZZA;Unknown type;12.95;MAIN;true;8;NONE
+                M005;FOOD;Too short;12.95;MAIN;true
+                M006;DRINK;Spruce beer;3.95;DRINK;true;355;false
                 """);
 
         Menu menu = new Menu();
         List<String> problems = FileStorage.load(file, FileStorage::parseMenuItem, menu);
 
-        assertEquals(2, menu.getAll().size(), "Only the 2 valid lines should be loaded");
-        assertTrue(menu.findById("M1").isPresent());
-        assertTrue(menu.findById("M6").isPresent());
+        assertEquals(2, menu.getAll().size());
+        assertEquals(4, problems.size());
+        assertTrue(menu.findById("M001").isPresent());
+        assertTrue(menu.findById("M006").isPresent());
+    }
 
-        assertEquals(4, problems.size(), "Exactly the 4 bad lines should be reported");
+    @Test
+    @DisplayName("Saved items are read back the same way")
+    void savesAndLoadsTheSameItems() throws IOException {
+        Path source = tempDir.resolve("menu_items.txt");
+        Files.writeString(source, """
+                M001;FOOD;Classic poutine;12.95;MAIN;true;8;NONE
+                M003;DRINK;Spruce beer;3.95;DRINK;true;355;false
+                """);
+        Menu menu = new Menu();
+        FileStorage.load(source, FileStorage::parseMenuItem, menu);
+
+        Path copy = tempDir.resolve("runtime/menu_items.txt");
+        FileStorage.save(copy, menu.getAll(), FileStorage::format);
+
+        Menu reloaded = new Menu();
+        List<String> problems = FileStorage.load(copy, FileStorage::parseMenuItem, reloaded);
+
+        assertTrue(problems.isEmpty());
+        assertEquals(Files.readString(source), Files.readString(copy));
+        assertEquals(2, reloaded.getAll().size());
     }
 }
