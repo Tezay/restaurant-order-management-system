@@ -29,6 +29,7 @@ mvn verify
 - [Analysis](docs/analysis.md)
 - [Class diagram and packages](docs/design/class-diagram.md)
 - [Sequence diagram](docs/design/sequence-diagram.svg)
+- [Concurrency view](docs/design/concurrency-view.md)
 
 ## Workflow
 
