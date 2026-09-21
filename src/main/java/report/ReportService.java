@@ -1,21 +1,26 @@
 package report;
 
-import model.*;
+import model.Category;
+import model.DietaryTag;
+import model.FoodItem;
+import model.MenuItem;
+import model.OrderStatus;
+import model.RestaurantOrder;
 import model.RestaurantOrder.OrderLine;
 import repository.Menu;
 import repository.Repository;
 
 import java.math.BigDecimal;
-import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Consumer;
 
 public class ReportService {
-    private Menu menu;
-    private Repository<RestaurantOrder> orders;
+    private final Menu menu;
+    private final Repository<RestaurantOrder> orders;
 
     private final Predicate<RestaurantOrder> countAsRevenue =
         o -> o.getStatus() == OrderStatus.PAID || o.getStatus() == OrderStatus.CLOSED;
@@ -32,10 +37,12 @@ public class ReportService {
     }
 
     public Map<Category, BigDecimal> salesByCategory() {
-        Map<Category, BigDecimal> sales = new EnumMap<>(Category.class);
+        Map<Category, BigDecimal> sales = new HashMap<>();
 
-        Consumer<OrderLine> addToCategory = line ->
-            sales.merge(line.getItem().getCategory(),line.getAmount(),BigDecimal::add);
+        Consumer<OrderLine> addToCategory = line -> {
+            Category category = line.getItem().getCategory();
+            sales.put(category, sales.getOrDefault(category, BigDecimal.ZERO).add(line.getAmount()));
+        };
 
         orders.getAll().stream().filter(countAsRevenue).flatMap(o -> o.getLines().stream())
             .forEach(addToCategory);
