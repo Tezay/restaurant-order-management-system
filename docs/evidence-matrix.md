@@ -9,5 +9,5 @@
 | 5 | Iterable and Iterator | `Menu` implements `Iterable<MenuItem>`, `Menu.iterator` | `RepositoryMenuTest` | |
 | 6 | Generics and wildcards | `Repository<T extends Identifiable>`, `Menu extends Repository<MenuItem>`, `FileStorage.load` and `save` (generic methods, `Collection<? extends T>`) | `RepositoryMenuTest`, `FileStorageTest` | |
 | 7 | Lambdas and Stream API | `ReportService`: a `Predicate`, a `Function` and a `Consumer`, with `reduce` in `totalRevenue` | `ReportServiceTest` | |
-| 8 | Reflection and annotations | | | |
+| 8 | Reflection and annotations | `@MenuOption`, read by `ConsoleMenu.findOptions` and `call` to build the menu | `ConsoleMenuTest` | |
 | 9 | Concurrency | `Cook.run` (Runnable), `KitchenBoard` (synchronized), `KitchenService.start`, `waitUntilDone` and `close` (start, join, interrupt) | `KitchenTest`, `KitchenServiceTest` | |

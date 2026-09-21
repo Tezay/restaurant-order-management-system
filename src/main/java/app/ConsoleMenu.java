@@ -72,7 +72,7 @@ public class ConsoleMenu {
     private void showOptions() {
         System.out.println();
         for (int i = 0; i < options.size(); i++) {
-            System.out.println((i + 1) + " : " + options.get(i).getAnnotation(MenuOption.class).label());
+            System.out.println("[" + (i + 1) + "] " + options.get(i).getAnnotation(MenuOption.class).label());
         }
     }
 
@@ -81,11 +81,16 @@ public class ConsoleMenu {
             option.invoke(this);
         } catch (InvocationTargetException e) {
             Throwable cause = e.getCause();
-            if (cause instanceof NoSuchElementException) {
-                throw (NoSuchElementException) cause;
+
+            // the input was closed while the option was asking a question: let run() stop the loop
+            if (cause instanceof NoSuchElementException closed) {
+                throw closed;
             }
-            System.out.println(cause instanceof RestaurantException
-                ? "Refused: " + cause.getMessage() : "Unexpected error: " + cause);
+            if (cause instanceof RestaurantException) {
+                System.out.println("Refused: " + cause.getMessage());
+            } else {
+                System.out.println("Unexpected error: " + cause);
+            }
         } catch (IllegalAccessException e) {
             System.out.println("This option cannot be called.");
         }
@@ -110,14 +115,13 @@ public class ConsoleMenu {
         while (true) {
             String text = readLine(prompt).replace(',', '.');
             try {
-                BigDecimal value = new BigDecimal(text).setScale(2);
-                if (value.scale() <= 2 && value.signum() > 0) {
-                    return value;
-                }
+                BigDecimal value = new BigDecimal(text);
                 if (value.signum() <= 0) {
                     System.out.println("The amount must be greater than 0.");
-                } else {
+                } else if (value.scale() > 2) {
                     System.out.println("Enter an amount like 20 or 20.50.");
+                } else {
+                    return value.setScale(2);
                 }
             } catch (NumberFormatException e) {
                 System.out.println("Enter an amount like 20 or 20.50.");
