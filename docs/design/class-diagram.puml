@@ -107,6 +107,7 @@ package model {
     + updateQuantity(itemId : String, quantity : int) : void
     + removeItem(itemId : String) : void
     + moveTo(next : OrderStatus) : void
+    + getTipRate() : TipRate
     + setTipRate(tipRate : TipRate) : void
     + getSubtotal() : BigDecimal
     + getTax() : BigDecimal
@@ -141,6 +142,8 @@ package model {
     PERCENT_20
     - rate : BigDecimal
     + applyTo(subtotal : BigDecimal) : BigDecimal
+    + getPercent() : int
+    + {static} fromPercent(percent : int) : TipRate
   }
 
   class CashPayment {

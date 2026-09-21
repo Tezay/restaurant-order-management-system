@@ -125,6 +125,10 @@ public class RestaurantOrder implements Identifiable {
         status = next;
     }
 
+    public TipRate getTipRate() {
+        return tipRate;
+    }
+
     public void setTipRate(TipRate tipRate) {
         this.tipRate = tipRate == null ? TipRate.NO_TIP : tipRate;
     }
