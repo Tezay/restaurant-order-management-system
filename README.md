@@ -69,3 +69,4 @@ printed. The formats are in [Analysis](docs/analysis.md).
 - Branches: `<type>/<issue>-<short-description>` (example: `feat/12-order-lifecycle`).
 - Pull request titles follow [Conventional Commits](https://www.conventionalcommits.org/).
 - [Who did what](docs/contributions.md)
+- [Responsible AI record](docs/responsible-ai.md)
