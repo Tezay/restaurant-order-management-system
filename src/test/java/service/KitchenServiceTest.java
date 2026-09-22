@@ -7,7 +7,7 @@ import model.FoodItem;
 import model.OrderStatus;
 import model.RestaurantOrder;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.RepeatedTest;
 
 import java.math.BigDecimal;
 
@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class KitchenServiceTest {
 
-    @Test
+    @RepeatedTest(10)
     @DisplayName("The order is READY when the kitchen has finished")
     void orderIsReadyAfterTheKitchen() throws RestaurantException {
         RestaurantOrder order = confirmedOrderOf(1);
@@ -29,7 +29,7 @@ class KitchenServiceTest {
         assertEquals(OrderStatus.READY, order.getStatus());
     }
 
-    @Test
+    @RepeatedTest(10)
     @DisplayName("A closed kitchen sends the order back to CONFIRMED")
     void orderGoesBackToConfirmedWhenTheKitchenCloses() throws RestaurantException {
         RestaurantOrder order = confirmedOrderOf(20);

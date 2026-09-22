@@ -142,6 +142,7 @@ public class OrderService {
             throw new RestaurantException("Order need to be READY to pay");
         }
 
+        TipRate previousTipRate = order.getTipRate();
         order.setTipRate(tipRate);
         BigDecimal total = order.getTotal();
 
@@ -151,7 +152,7 @@ public class OrderService {
             return change;
 
         } catch (RestaurantException e) {
-            order.setTipRate(TipRate.NO_TIP);
+            order.setTipRate(previousTipRate);
             throw e;
         }
     }
